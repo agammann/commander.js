@@ -182,8 +182,8 @@ halal servings: v
 If you wish to use options taking varying arguments as boolean options, you need to specify them separately.
 
 ```console
-$ collect -a -v -l
-any servings: true
+$ collect -o -v -l
+other servings: true
 vegan servings: true
 halal servings: true
 ```
@@ -191,7 +191,7 @@ halal servings: true
 ### Combining short options as if boolean
 
 Before Commander v5, combining a short option and the value was not supported, and combined short flags were always expanded.
-So `-avl` expanded to `-a -v -l`.
+So `-ovl` expanded to `-o -v -l`.
 
 If you want backwards compatible behaviour, or prefer combining short options as booleans to combining short option and value,
 you may change the behaviour.
