@@ -425,6 +425,15 @@ program
   .addOption(new Option('--free-drink', 'small drink included free ').implies({ drink: 'small' }));
 ```
 
+By default, options configured with `.env()` read from `process.env`. You can
+provide a different environment for one parse call, including subcommands:
+
+```js
+program.parse(process.argv, { env: { PORT: '3000' } });
+```
+
+Passing an empty `env` object ignores `process.env` for these options.
+
 ```console
 $ extra --help
 Usage: help [options]

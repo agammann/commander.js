@@ -3,6 +3,59 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert/strict';
 
 describe('Option.env()', () => {
+  describe('custom parse environment', () => {
+    test('uses supplied values without reading process.env', () => {
+      const program = new commander.Command();
+      program.addOption(new commander.Option('--foo <value>').env('BAR'));
+      program.addOption(new commander.Option('--enabled').env('ENABLED'));
+      program.parse([], {
+        from: 'user',
+        env: { BAR: 'custom', ENABLED: '' },
+      });
+      assert.deepEqual(program.opts(), { foo: 'custom', enabled: true });
+    });
+
+    test('empty environment ignores process.env', () => {
+      const program = new commander.Command();
+      program.addOption(new commander.Option('--foo <value>').env('BAR'));
+      const previous = process.env.BAR;
+      process.env.BAR = 'actual';
+      try {
+        program.parse([], { from: 'user', env: {} });
+        assert.equal(program.opts().foo, undefined);
+      } finally {
+        if (previous === undefined) delete process.env.BAR;
+        else process.env.BAR = previous;
+      }
+    });
+
+    test('passes the environment to subcommands', () => {
+      const program = new commander.Command();
+      const sub = program.command('sub');
+      sub.addOption(new commander.Option('--foo <value>').env('BAR'));
+      program.parse(['sub'], { from: 'user', env: { BAR: 'custom' } });
+      assert.equal(sub.opts().foo, 'custom');
+    });
+
+    test('uses the environment for each parse call', () => {
+      const program = new commander.Command();
+      program.addOption(new commander.Option('--foo <value>').env('BAR'));
+      program.parse([], { from: 'user', env: { BAR: 'first' } });
+      assert.equal(program.opts().foo, 'first');
+      program.parse([], { from: 'user', env: { BAR: 'second' } });
+      assert.equal(program.opts().foo, 'second');
+      program.parse([], { from: 'user', env: {} });
+      assert.equal(program.opts().foo, undefined);
+    });
+
+    test('works with parseAsync', async () => {
+      const program = new commander.Command();
+      program.addOption(new commander.Option('--foo <value>').env('BAR'));
+      await program.parseAsync([], { from: 'user', env: { BAR: 'custom' } });
+      assert.equal(program.opts().foo, 'custom');
+    });
+  });
+
   // treating optional same as required, treat as option taking value rather than as boolean
   describe('option declared with value', () => {
     const flagsList = ['-f, --foo <required-arg>', '-f, --foo [optional-arg]'];

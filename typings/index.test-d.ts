@@ -347,10 +347,16 @@ expectType<commander.Command>(
   program.parse(['node', 'script.js'], { from: 'electron' }),
 );
 expectType<commander.Command>(program.parse(['--option'], { from: 'user' }));
+expectType<commander.Command>(
+  program.parse(['node', 'script.js'], { env: { PORT: '3000' } }),
+);
 expectType<commander.Command>(program.parse(['node', 'script.js'] as const));
 
 // parseAsync, same tests as parse
 expectType<Promise<commander.Command>>(program.parseAsync());
+expectType<Promise<commander.Command>>(
+  program.parseAsync(['node', 'script.js'], { env: { PORT: '3000' } }),
+);
 expectType<Promise<commander.Command>>(program.parseAsync(process.argv));
 expectType<Promise<commander.Command>>(
   program.parseAsync(['node', 'script.js'], { from: 'node' }),
