@@ -33,6 +33,33 @@ describe('Command.parse()', () => {
       assert.deepEqual(program.args, ['user']);
     });
 
+    test('when Electron runs as Node then skip the script path', () => {
+      const program = new commander.Command();
+      program.argument('[args...]');
+      const holdArgv = process.argv;
+      const holdElectron = process.versions.electron;
+      const holdRunAsNode = process.env.ELECTRON_RUN_AS_NODE;
+      try {
+        process.argv = ['electron', 'script.js', 'user'];
+        process.versions.electron = '1.2.3';
+        process.env.ELECTRON_RUN_AS_NODE = '1';
+        program.parse();
+      } finally {
+        process.argv = holdArgv;
+        if (holdElectron === undefined) {
+          delete process.versions.electron;
+        } else {
+          process.versions.electron = holdElectron;
+        }
+        if (holdRunAsNode === undefined) {
+          delete process.env.ELECTRON_RUN_AS_NODE;
+        } else {
+          process.env.ELECTRON_RUN_AS_NODE = holdRunAsNode;
+        }
+      }
+      assert.deepEqual(program.args, ['user']);
+    });
+
     test('when args then app/script/args', () => {
       const program = new commander.Command();
       program.argument('[args...]');
